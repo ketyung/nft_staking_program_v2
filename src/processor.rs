@@ -69,24 +69,7 @@ fn process_staking_instruction(program_id : &Pubkey, accounts : &[AccountInfo], 
             }
         },
 
-        StakingInstruction::UpdateStake =>{
-
-
-            let f  = StakingManager::update_stake(program_id, &accounts);
-
-            match f {
-
-                Ok(_)=> { Ok(())},
-
-                Err(error) => {
-
-                    return Err(ProgramError::from(error));
-
-                }
-            }
-
-        },
-
+       
         StakingInstruction::Withdraw {token_decimal, is_simulation} => {
 
       

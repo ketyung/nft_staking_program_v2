@@ -14,7 +14,6 @@ use {
     crate::state::{NftStake},
     crate::index::{NftIndex},
 };
-use std::convert::{TryFrom};
 use crate::{error::TokenProgramError};
 
 
@@ -127,51 +126,6 @@ impl StakingManager {
         Ok(())
 
     }
-}
-
-impl StakingManager {
-
-    // to be called by bot to update the reward
-    pub fn update_stake(program_id: &Pubkey, accounts: &[AccountInfo])  -> ProgramResult {
-
-        let account_info_iter = &mut accounts.iter();
-
-        let stake_account = next_account_info(account_info_iter)?;
-    
-        if stake_account.owner != program_id {
-
-            return Err( ProgramError::IncorrectProgramId );
-        }
-
-        let stored_stake = NftStake::unpack_unchecked(&stake_account.data.borrow());
-   
-
-        match stored_stake {
-
-            Ok(mut stake) => {
-    
-                let curr_time = Clock::get().unwrap().unix_timestamp;
-
-                // 6 decimals
-               
-                stake.last_update = curr_time;
-
-                handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
-
-            },
-
-            Err(error) => {
-    
-                return Err(ProgramError::from(error));
-
-            }
-
-        }
-
-        Ok(())
-
-    }
-
 }
 
 
