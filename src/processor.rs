@@ -13,14 +13,11 @@ use {
 
     crate::staking_manager::StakingManager,
 
-  
 };
 
 
-
+// mod staking is 2
 const MOD_STAKING : u8 = 2;
-
-
 
 pub fn process_instruction(program_id: &Pubkey,accounts: &[AccountInfo], instruction_data: &[u8],) 
 -> ProgramResult {
