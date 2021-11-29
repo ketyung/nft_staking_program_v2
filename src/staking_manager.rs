@@ -473,9 +473,12 @@ impl StakingManager{
                        // let ratio = StakingManager::convert( time_diff_earned).unwrap_or(0.0) / 
                        // StakingManager::convert(REWARD_BASED_ON_TIME).unwrap_or(0.0);
 
-                        
+                        let ratio = (StakingManager::convert( time_diff_earned).unwrap_or(0.0) / 
+                        StakingManager::convert(REWARD_BASED_ON_TIME).unwrap_or(0.0) ) * 100000.0 ;
+
+                        let ratio_as_u64 = ratio as u64;
                      
-                        let curr_reward =  (time_diff_earned / REWARD_BASED_ON_TIME * decimal) as u64;
+                        let curr_reward =  (( ratio_as_u64 * decimal) as u64) / 100000;
 
                         
                         let new_token_reward = stake.token_reward + curr_reward;
@@ -553,6 +556,15 @@ impl StakingManager{
 
         Ok(())
        
+    }
+
+    #[allow(dead_code)]
+    fn convert(x: u64) -> Result<f64, &'static str> {
+        let result = x as f64;
+        if result as u64 != x {
+            return Err("cannot convert")
+        }
+        Ok(result)
     }
 
     
