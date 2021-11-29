@@ -303,7 +303,7 @@ impl StakingManager {
 impl StakingManager {
 
     pub fn withdraw(program_id: &Pubkey, accounts: &[AccountInfo],
-        token_decimal : u32, count : u8, random_number : u8 )  -> ProgramResult{
+        _token_decimal : u32, count : u8, random_number : u8 )  -> ProgramResult{
 
         let account_info_iter = &mut accounts.iter();
 
@@ -314,6 +314,8 @@ impl StakingManager {
         let signer_token_account = next_account_info(account_info_iter)?;
         let token_program = next_account_info(account_info_iter)?; 
         let index_account = next_account_info(account_info_iter)?;
+
+        let token_decimal = crate::state::DC_TOKEN_DECIMAL;
 
         if !signer_account.is_signer {
 
