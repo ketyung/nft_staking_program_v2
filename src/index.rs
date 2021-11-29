@@ -18,7 +18,10 @@ pub struct NftIndex {
 
     pub first_stake_date : UnixTimestamp,
 
+    pub stat : u8, 
+
     nfts : Vec<Pubkey>,
+
 }
 
 
@@ -33,7 +36,10 @@ impl NftIndex {
 
             first_stake_date : date, 
 
-            nfts : Vec::with_capacity(NFT_SIZE_LIMIT),            
+            stat : 0, 
+    
+            nfts : Vec::with_capacity(NFT_SIZE_LIMIT),   
+            
         }
     }
 }
@@ -43,19 +49,20 @@ impl Sealed for NftIndex{}
 
 impl Pack for NftIndex {
 
-    const LEN: usize = PUBKEY_BYTES + 8 + 1 +  (PUBKEY_BYTES * NFT_SIZE_LIMIT) ;
+    const LEN: usize = PUBKEY_BYTES + 8 + 1 +  1 +  (PUBKEY_BYTES * NFT_SIZE_LIMIT) ;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
 
-        const L : usize =  PUBKEY_BYTES + 8 + 1 + (PUBKEY_BYTES *  NFT_SIZE_LIMIT); 
+        const L : usize =  PUBKEY_BYTES + 8 + 1 + 1 + (PUBKEY_BYTES *  NFT_SIZE_LIMIT); 
 
         let output = array_mut_ref![dst, 0, L];
 
-        let (owner, first_stake_date, len, data_flat) = 
-        mut_array_refs![output, PUBKEY_BYTES, 8, 1, (PUBKEY_BYTES * NFT_SIZE_LIMIT) ];
+        let (owner, first_stake_date, stat, len, data_flat) = 
+        mut_array_refs![output, PUBKEY_BYTES, 8, 1, 1,  (PUBKEY_BYTES * NFT_SIZE_LIMIT) ];
 
         *len = u8::try_from(self.nfts.len()).unwrap().to_le_bytes();       
         *first_stake_date = self.first_stake_date.to_le_bytes();
+        *stat = u8::try_from(self.stat).unwrap().to_le_bytes();       
          
         owner.copy_from_slice(self.owner.as_ref());
       
@@ -77,16 +84,16 @@ impl Pack for NftIndex {
 
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
 
-        const L : usize = PUBKEY_BYTES + 8 + 1 + (PUBKEY_BYTES * NFT_SIZE_LIMIT) ; 
+        const L : usize = PUBKEY_BYTES + 8 + 1 + 1 + (PUBKEY_BYTES * NFT_SIZE_LIMIT) ; 
 
         let input = array_ref![src, 0, L];
         
-        let (user, first_stake_date, len, nfts) = array_refs![input, PUBKEY_BYTES ,8, 1,  
+        let (user, first_stake_date, stat, len, nfts) = array_refs![input, PUBKEY_BYTES ,8, 1, 1,  
         (PUBKEY_BYTES * NFT_SIZE_LIMIT) ];
 
         let len = u8::from_le_bytes(*len);
         let first_stake_date = i64::from_le_bytes(*first_stake_date);
-       
+        let stat = u8::from_le_bytes(*stat);
 
         let mut offset = 0 ;
 
@@ -104,6 +111,7 @@ impl Pack for NftIndex {
         Ok(Self{
             owner : Pubkey::new_from_array(*user) ,
             first_stake_date : first_stake_date, 
+            stat : stat, 
             nfts : new_nfts,
         })
     }

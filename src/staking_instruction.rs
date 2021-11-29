@@ -7,6 +7,7 @@ use solana_program::{
 
 use arrayref::{array_ref, array_refs}; //, array_refs};
 
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum StakingInstruction {
 
@@ -21,8 +22,19 @@ pub enum StakingInstruction {
 
         token_decimal : u32,
 
-        is_simulation : u8, 
+        count : u8,
+        
+        random_number : u8, 
     }, 
+
+    // for unstaking individual
+    // only for testing
+    Unstake, 
+
+    Restake {
+
+        for_month : u8, 
+    },
 
     None,
  
@@ -33,6 +45,10 @@ const CREATE_STAKE : u8 = 1;
 const UPDATE_STAKE : u8 = 2;
 
 const WITHDRAW : u8 = 3;
+
+const UNSTAKE : u8 = 4; 
+
+const RESTAKE : u8 = 5; 
 
 
 impl StakingInstruction {
@@ -58,12 +74,26 @@ impl StakingInstruction {
 
             &WITHDRAW => {
 
-                let (token_decimal, is_simulation) = Self::unpack_withdrawal_instruction(rest);
+                let (token_decimal, count, random_number ) = Self::unpack_withdrawal_instruction(rest);
                 Self::Withdraw{
 
                     token_decimal: token_decimal,
-                    is_simulation : is_simulation, 
+                    count : count,
+                    random_number : random_number,  
                 }
+            },
+
+            &UNSTAKE  => {
+
+                Self::Unstake
+
+            },
+
+            &RESTAKE  => {
+
+                let for_month = Self::unpack_staking_instruction(rest);  
+                Self::Restake{ for_month : for_month}   
+
             },
 
             _ => {
@@ -93,15 +123,15 @@ impl StakingInstruction {
     }
 
 
-    fn unpack_withdrawal_instruction (input : &[u8]) -> (u32, u8) {
+    fn unpack_withdrawal_instruction (input : &[u8]) -> (u32, u8, u8) {
 
-        const S : usize = 5; 
+        const S : usize = 6; 
 
         let src = array_ref![input, 0, S];
 
-        let (token_decimal, is_simulation) = array_refs![src, 4,1];
+        let (token_decimal, count, random_number ) = array_refs![src, 4,1,1];
 
-        ( u32::from_le_bytes(*token_decimal), u8::from_le_bytes(*is_simulation))
+        ( u32::from_le_bytes(*token_decimal), u8::from_le_bytes(*count), u8::from_le_bytes(*random_number))
        
     }
 }

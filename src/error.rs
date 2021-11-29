@@ -18,6 +18,18 @@ pub enum TokenProgramError {
     #[error("Invalid signer")]
     InvalidSigner,
 
+    #[error("Vault already exists")]
+    VaultAlreadyExists,
+
+    #[error("Error, already staked!")]
+    AlreadyStakedError,
+
+    #[error("Invalid mint authority!")]
+    InvalidMintAuthority,
+
+    #[error("Error, already withdrawn!")]
+    AlreadyWithdrawn,
+
 }
 
 
