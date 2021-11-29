@@ -389,13 +389,7 @@ impl StakingManager {
         }
 
 
-        //assert_eq!(count, 100);
        
-        //msg!("accumulated.tk.cnt::{}", accumulated_token_count);
-
-        // uncomment this for testing so can view each log message at console
-        // assert_eq!(accumulated_token_count, 100);
-
         /*
         let token_program = next_account_info(account_info_iter)?;
         let system_pda_token_account = next_account_info(account_info_iter)?;
