@@ -9,7 +9,7 @@ use solana_program::{
 };
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
-pub const DC_TOKEN_DECIMAL : u32 = 6;
+pub const DC_TOKEN_DECIMAL : u32 = 9;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sys {

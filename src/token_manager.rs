@@ -7,7 +7,7 @@ use {
         pubkey::Pubkey,
         program_pack::{Pack},
         program_error::ProgramError,
-        program::{invoke_signed, invoke},
+        program::{invoke},
     },
     crate::state::{Sys},
     crate::staking_manager::{handle_program_result},
@@ -16,108 +16,6 @@ use {
 
 pub struct TokenManager {}
 
-impl TokenManager {
-
-
-    pub fn mint_token (_program_id: &Pubkey, accounts: &[AccountInfo],
-        amount : u64, decimal : u64, _finalized : bool) -> ProgramResult{
-
-
-        let account_info_iter = &mut accounts.iter();
-
-        let signer_account = next_account_info(account_info_iter)?;
-        
-        let token_mint = next_account_info(account_info_iter)?; 
-    
-        let token_account = next_account_info(account_info_iter)?; 
-        
-        let token_program = next_account_info(account_info_iter)?;
-
-        msg!("Minting amount :{}, finalized : {}", amount, _finalized);
-           
-        msg!("signer.key::{:?}", signer_account.key);
-        msg!("token.mint::{:?}", token_mint.key);
-        msg!("token.acc::{:?}", token_account.key);
-        msg!("token.prog::{:?}", token_program.key);
-        
-    
-        if !signer_account.is_signer {
-
-            return Err(ProgramError::MissingRequiredSignature);
-        }
-
-    
-        if *token_account.owner != spl_token::id() {
-            msg!("token_account.owner is {:?}, whereas spl_token prog id is::{:?}", 
-            token_account.owner, spl_token::id());
-            return Err(ProgramError::IncorrectProgramId);
-        }
-    
-
-        let mut token_count = amount * decimal;
-
-        // decimal 0 is NFT
-        if decimal == 0 {
-
-            token_count = 1;
-        }
-
-        let ix = spl_token::instruction::mint_to(
-            token_program.key,
-            token_mint.key,
-            token_account.key,
-            signer_account.key,
-            &[],
-            token_count,
-        )?;
-    
-    
-        let signers = &[
-            signer_account.key.as_ref(),
-        ];
-    
-        msg!("Going.to.mint.token....");
-
-        invoke_signed(
-            &ix,
-            &[
-                token_mint.clone(),
-                token_account.clone(),
-                signer_account.clone(),
-                token_program.clone(),
-            ],
-            &[signers],
-        )?;
-
-        if _finalized {
-
-            let freeze_ix = spl_token::instruction::close_account(
-                token_program.key, token_account.key, 
-                token_mint.key, token_account.key, &[])?;
-
-        
-            invoke_signed(
-                &freeze_ix,
-                &[
-                    token_mint.clone(),
-                    token_account.clone(),
-                    signer_account.clone(),
-                    token_program.clone(),
-                ],
-                &[signers],
-            )?;
-    
-
-        }
-
-        msg!("token.minted!...");
-        
-
-        Ok(())
-
-
-    }
-}
 
 impl TokenManager {
 
