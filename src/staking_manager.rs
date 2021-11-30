@@ -19,6 +19,7 @@ use {
 
 use std::convert::{TryFrom};
 use crate::{error::TokenProgramError};
+use std::str::FromStr;
 
 
 pub struct StakingManager {}
@@ -315,6 +316,7 @@ impl StakingManager {
         let signer_token_account = next_account_info(account_info_iter)?;
         let token_program = next_account_info(account_info_iter)?; 
         let index_account = next_account_info(account_info_iter)?;
+        let treasury_account = next_account_info(account_info_iter)?;
 
         let token_decimal = crate::state::DC_TOKEN_DECIMAL;
 
@@ -336,12 +338,18 @@ impl StakingManager {
             return Err(ProgramError::IncorrectProgramId);
 
         }
+        
 
         if Self::already_withdrawn(&index_account){
 
             return Err(ProgramError::from(TokenProgramError::AlreadyWithdrawn));
         }
 
+
+        if *treasury_account.key !=  Pubkey::from_str(crate::state::TREASURY_ACCOUNT).unwrap() {
+
+            return Err(ProgramError::from(TokenProgramError::InvalidTreasuryAccount));
+        }
 
         
 
@@ -380,7 +388,7 @@ impl StakingManager {
             let accs = &[token_program.clone(),  
             stake_account.clone(), nft_token_account.clone(),
             vault_token_account.clone(), nft_pda_account.clone(), 
-            nft_mint_account.clone()];
+            nft_mint_account.clone(), treasury_account.clone()];
 
          
             handle_program_result( Self::unstake_account(&program_id, accs, &mut accumulated_token_count, 
@@ -434,6 +442,7 @@ impl StakingManager{
         let vault_token_account = next_account_info(account_info_iter)?;
         let pda_account = next_account_info(account_info_iter)?;
         let nft_mint_account = next_account_info(account_info_iter)?;
+        let treasury_account = next_account_info(account_info_iter)?;
        // let signer_account = next_account_info(account_info_iter)?;
 
        
@@ -515,6 +524,14 @@ impl StakingManager{
                     
 
                         if is_withdrawal {
+
+                            // we need to close the vault account here 
+                            // for withdrawal to transfer back the SOL to treasury account
+
+                            Self::close_vault_account(program_id, 
+                                &[token_program.clone(), vault_token_account.clone(), 
+                                treasury_account.clone(), pda_account.clone()], *nft_mint_account.key )?;
+
 
                             let zeros = &vec![0; stake_account.data_len()];
                             // delete the data 
@@ -699,17 +716,9 @@ impl StakingManager {
         let nft_mint_account = next_account_info(account_info_iter)?;
         let vault_token_account = next_account_info(account_info_iter)?;
         
-        /*
-        msg!("burn.nft  : nft:{:?}", nft_mint);
-        msg!("burn.nft : token_prg:{:?}", token_program.key);
-        msg!("burn.nft : nft_mint_acc:{:?}", nft_mint_account.key);
-        msg!("burn.nft : nft_pda_acc:{:?}", nft_pda_account.key);
-         */
-        
         // create PDA based on the NFT mint
 
-       // msg!("burn.nft");
-
+      
         let addr = &[nft_mint.as_ref()];
          
         let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
@@ -750,6 +759,49 @@ impl StakingManager {
             }
         }
 
+        Ok(())
+    }
+}
+
+impl StakingManager {
+
+
+    fn close_vault_account (program_id :&Pubkey, accounts: &[AccountInfo],  nft_mint : Pubkey) -> ProgramResult{
+
+
+        let account_info_iter = &mut accounts.iter();
+
+        let token_program = next_account_info(account_info_iter)?;
+        let vault_token_account = next_account_info(account_info_iter)?;
+        let treasury_account = next_account_info(account_info_iter)?;
+        let pda_account = next_account_info(account_info_iter)?;
+
+        let addr = &[nft_mint.as_ref()];
+         
+        let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
+      
+        let close_vault_acc_ix = spl_token::instruction::close_account(
+            token_program.key,
+            vault_token_account.key,
+            treasury_account.key,
+            &pda,
+            &[&pda]
+        )?;
+        
+        msg!("Calling the token program to close vault token account... and transfer back sol to {:?}", 
+        treasury_account.key);
+        
+        invoke_signed(
+            &close_vault_acc_ix,
+            &[
+                vault_token_account.clone(),
+                treasury_account.clone(),
+                pda_account.clone(),
+                token_program.clone(),
+            ],
+            &[&[&b"escrow"[..], &[bump_seed]]],
+        )?;
+        
         Ok(())
     }
 }

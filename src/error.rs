@@ -30,6 +30,9 @@ pub enum TokenProgramError {
     #[error("Error, already withdrawn!")]
     AlreadyWithdrawn,
 
+    #[error("Invalid Treasury Account!")]
+    InvalidTreasuryAccount,
+
 }
 
 

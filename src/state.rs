@@ -9,7 +9,11 @@ use solana_program::{
 };
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
+
 pub const DC_TOKEN_DECIMAL : u32 = 9;
+
+pub const TREASURY_ACCOUNT : &str = "kY5DkcuLB2qJ5RrPWKV2YFD3aWx1oyRv9u6DKqyjAf3";
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sys {
