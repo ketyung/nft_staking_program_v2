@@ -54,7 +54,7 @@ impl TokenManager {
         }
 
         // tempoarily disabled 
-        assert_eq!(1,2);
+       // assert_eq!(1,2);
 
       //  msg!("sys_token_account: {:?}", dc_token_account.key);
       //  msg!("sys_token_mint: {:?}", dc_token_mint.key);

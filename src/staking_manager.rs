@@ -578,7 +578,7 @@ impl StakingManager {
         let signer_token_account = next_account_info(account_info_iter)?;
         let system_pda = next_account_info(account_info_iter)?;
        
-       // msg!("tx.dc.token to :{:?} amount :{}", signer_token_account.key, amount);
+         msg!("tx.dc.token to :{:?} amount :{}", signer_token_account.key, amount);
 
         let addr = &[b"dcescrow".as_ref()];
 
@@ -634,17 +634,22 @@ impl StakingManager {
 
         /*
         msg!("rs.token_prog::{:?}", token_program.key);
-        msg!("rs.nft_token_acc::{:?}", nft_token_account.key);
-        msg!("rs.vault_token_acc::{:?}", vault_token_account.key);
         msg!("rs.pda_acc::{:?}", pda_account.key);
         msg!("rs.pda::{}", pda);
         */
 
+
+        msg!("rs.nft_token_acc::{:?}", nft_token_account.key);
+        msg!("rs.vault_token_acc::{:?}", vault_token_account.key);
+        msg!("rs.pda_acc::{:?}", pda_account.key);
+      
         let addr = &[nft_mint.as_ref()];
 
         let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
         
         
+        msg!("tx.token.back");
+
         let tf_ix = spl_token::instruction::transfer(
             token_program.key,
             vault_token_account.key,
@@ -701,6 +706,9 @@ impl StakingManager {
          */
         
         // create PDA based on the NFT mint
+
+        msg!("burn.nft");
+
         let addr = &[nft_mint.as_ref()];
          
         let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
