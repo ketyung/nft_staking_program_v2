@@ -132,6 +132,8 @@ pub struct NftStake {
 
     pub created : UnixTimestamp,
 
+    pub vault_account : Pubkey,
+
 
 }
 
@@ -152,6 +154,7 @@ impl NftStake {
             stat : 0, 
             created : date, 
             meta_key : Pubkey::default(),
+            vault_account : Pubkey::default(),
             
         }
     }
@@ -162,7 +165,7 @@ impl NftStake {
 impl Sealed for NftStake{}
 
 const NFTSTAKE_DATA_SIZE : usize = 
-PUBKEY_BYTES + PUBKEY_BYTES + 1 + PUBKEY_BYTES + PUBKEY_BYTES + 8 + 8 + 8 + 8 + 1 + 8 + PUBKEY_BYTES;
+PUBKEY_BYTES + PUBKEY_BYTES + 1 + PUBKEY_BYTES + PUBKEY_BYTES + 8 + 8 + 8 + 8 + 1 + 8 + PUBKEY_BYTES + PUBKEY_BYTES;
 
 
 impl Pack for NftStake {
@@ -178,9 +181,9 @@ impl Pack for NftStake {
         let (nft_mint, owner, for_month, pda, 
             nft_token_account, 
             rate, token_reward, stake_date, last_update, 
-            stat, created, meta_key) = 
+            stat, created, meta_key, vault_account) = 
         mut_array_refs![ output,PUBKEY_BYTES,PUBKEY_BYTES,1,PUBKEY_BYTES,PUBKEY_BYTES,8,8, 8, 8, 1, 
-        8, PUBKEY_BYTES];
+        8, PUBKEY_BYTES, PUBKEY_BYTES];
 
 
         nft_mint.copy_from_slice(self.nft_mint.as_ref());
@@ -201,6 +204,8 @@ impl Pack for NftStake {
         *created = self.created.to_le_bytes();
 
         meta_key.copy_from_slice( self.meta_key.as_ref());
+        vault_account.copy_from_slice( self.vault_account.as_ref());
+        
     }
 
 
@@ -210,10 +215,10 @@ impl Pack for NftStake {
        
         let (nft_mint,owner, for_month, pda, nft_token_account, 
             rate, token_reward, stake_date, last_update, stat, 
-            created, meta_key) = 
+            created, meta_key, vault_account) = 
        
         array_refs![input, PUBKEY_BYTES,PUBKEY_BYTES, 1, PUBKEY_BYTES,PUBKEY_BYTES, 
-        8, 8, 8, 8 , 1, 8, PUBKEY_BYTES];
+        8, 8, 8, 8 , 1, 8, PUBKEY_BYTES, PUBKEY_BYTES];
 
         let nft_mint = Pubkey::new_from_array(*nft_mint);
         let owner = Pubkey::new_from_array(*owner);
@@ -228,6 +233,7 @@ impl Pack for NftStake {
         let stat =  u8::from_le_bytes(*stat);
         let created = i64::from_le_bytes(*created);
         let meta_key = Pubkey::new_from_array(*meta_key);
+        let vault_account = Pubkey::new_from_array(*vault_account);
         
 
         Ok( NftStake{
@@ -243,6 +249,7 @@ impl Pack for NftStake {
             stat : stat, 
             created : created,
             meta_key : meta_key,
+            vault_account : vault_account, 
             
         })
     }

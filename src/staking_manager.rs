@@ -95,7 +95,7 @@ impl StakingManager {
                 stake.pda = pda;
                 stake.owner = *signer_account.key; 
                 stake.meta_key = *meta_account.key; 
-              
+                stake.vault_account = *vault_token_account.key;
                
                 handle_program_result (NftStake::pack(stake, &mut stake_account.data.borrow_mut()) );
     
@@ -112,6 +112,7 @@ impl StakingManager {
                 stake.pda = pda;
                 stake.owner = *signer_account.key; 
                 stake.meta_key = *meta_account.key; 
+                stake.vault_account = *vault_token_account.key;
               
                 handle_program_result( NftStake::pack(stake, &mut stake_account.data.borrow_mut()) );
                
