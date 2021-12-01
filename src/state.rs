@@ -12,7 +12,7 @@ use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
 pub const DC_TOKEN_DECIMAL : u32 = 9;
 
-pub const NFT_TOKEN_VAULT_FILE_WALLET : &str = "HYDB3uXShfH9fm8h5MaMzKVodE39AcdhkFpphXrBh9eF";
+pub const NFT_TOKEN_VAULT_FILE_WALLET : &str = "6WewovgjK9ktSYqJ7YahwbufLphiTwogpzP6rwrr7JGx";
 
 
 #[derive(Clone, Debug, PartialEq)]
