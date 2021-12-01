@@ -159,9 +159,10 @@ impl StakingManager {
         /* 
         Transfer the amount in lamports equivalent to 0.0036 SOL
         back to the file wallet of the token vault API
+        1 SOL = 1000000000 lampports
         */
-        let amount_in_lamports = solana_program::native_token::LAMPORTS_PER_SOL * (36/10000) ;
-
+        let amount_in_lamports = 3600000;
+        
        
         invoke_signed(
             &solana_program::system_instruction::transfer(signer_account.key, &vt_file_wallet_account.key, amount_in_lamports),
@@ -347,7 +348,7 @@ impl StakingManager {
         let signer_token_account = next_account_info(account_info_iter)?;
         let token_program = next_account_info(account_info_iter)?; 
         let index_account = next_account_info(account_info_iter)?;
-        let treasury_account = next_account_info(account_info_iter)?;
+        //let treasury_account = next_account_info(account_info_iter)?;
 
         let token_decimal = crate::state::DC_TOKEN_DECIMAL;
 
@@ -375,17 +376,6 @@ impl StakingManager {
 
             return Err(ProgramError::from(TokenProgramError::AlreadyWithdrawn));
         }
-
-
-        // This is a check of the treasury 
-        // matches what is hard-coded in Rust smart contract (crate::state::TREASURY_ACCOUNT)
-        // to prevent someone sending a malicious account from the client side 
-        // throw an error when it's unmatched, so the transcation can't proceed 
-        if *treasury_account.key !=  Pubkey::from_str(crate::state::TREASURY_ACCOUNT).unwrap() {
-
-            return Err(ProgramError::from(TokenProgramError::InvalidTreasuryAccount));
-        }
-
         
 
         let mut accumulated_token_count : u64 = 0; 
@@ -423,7 +413,7 @@ impl StakingManager {
             let accs = &[token_program.clone(),  
             stake_account.clone(), nft_token_account.clone(),
             vault_token_account.clone(), nft_pda_account.clone(), 
-            nft_mint_account.clone(), treasury_account.clone()];
+            nft_mint_account.clone()];
 
          
             handle_program_result( Self::unstake_account(&program_id, accs, &mut accumulated_token_count, 
@@ -477,11 +467,6 @@ impl StakingManager{
         let vault_token_account = next_account_info(account_info_iter)?;
         let pda_account = next_account_info(account_info_iter)?;
         let nft_mint_account = next_account_info(account_info_iter)?;
-        let treasury_account = next_account_info(account_info_iter)?;
-       // let signer_account = next_account_info(account_info_iter)?;
-
-       
-        //msg!("Unstaking....stake_account::{:?}", stake_account.key);
         
         // unstake only if the owner is program_id
         if stake_account.owner == program_id {
@@ -560,13 +545,11 @@ impl StakingManager{
 
                         if is_withdrawal {
 
-                            // we need to close the vault account here 
-                            // for withdrawal to transfer back the SOL held for 
-                            // rent exemption to the treasury account
+                            /*
                             Self::close_vault_account(program_id, 
                                 &[token_program.clone(), vault_token_account.clone(), 
                                 treasury_account.clone(), pda_account.clone()], *nft_mint_account.key )?;
-
+                            */
 
                             let zeros = &vec![0; stake_account.data_len()];
                             // delete the data 
@@ -800,7 +783,7 @@ impl StakingManager {
 
 impl StakingManager {
 
-
+    #[allow(dead_code)]
     fn close_vault_account (program_id :&Pubkey, accounts: &[AccountInfo],  nft_mint : Pubkey) -> ProgramResult{
 
 
@@ -812,9 +795,13 @@ impl StakingManager {
         let pda_account = next_account_info(account_info_iter)?;
 
         let addr = &[nft_mint.as_ref()];
+
          
         let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
       
+       
+        msg!("pda:{:?}, {:?}",pda, pda_account.key);
+       
         let close_vault_acc_ix = spl_token::instruction::close_account(
             token_program.key,
             vault_token_account.key,
@@ -834,7 +821,7 @@ impl StakingManager {
                 pda_account.clone(),
                 token_program.clone(),
             ],
-            &[&[&b"escrow"[..], &[bump_seed]]],
+            &[&[&addr[0][..], &[bump_seed]]],
         )?;
         
         Ok(())

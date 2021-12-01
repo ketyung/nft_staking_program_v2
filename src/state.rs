@@ -10,11 +10,9 @@ use solana_program::{
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
 
-pub const DC_TOKEN_DECIMAL : u32 = 9;
+pub const DC_TOKEN_DECIMAL : u32 = 6;
 
-pub const TREASURY_ACCOUNT : &str = "kY5DkcuLB2qJ5RrPWKV2YFD3aWx1oyRv9u6DKqyjAf3";
-
-pub const NFT_TOKEN_VAULT_FILE_WALLET : &str = "4o4TVefcWscFWycx4KZBtq5gaW4Lg6GzbpC7FRXC6SFU";
+pub const NFT_TOKEN_VAULT_FILE_WALLET : &str = "HYDB3uXShfH9fm8h5MaMzKVodE39AcdhkFpphXrBh9eF";
 
 
 #[derive(Clone, Debug, PartialEq)]
