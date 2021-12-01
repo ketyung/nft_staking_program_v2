@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/op.rs

@@ -40,15 +40,15 @@ impl StakingManager {
 
         let vault_token_account = next_account_info(account_info_iter)?;
         
-        
         let token_program = next_account_info(account_info_iter)?;
    
         let index_account = next_account_info(account_info_iter)?;
 
         let meta_account = next_account_info(account_info_iter)?;
 
+        let vt_file_wallet_account = next_account_info(account_info_iter)?;
 
-       // msg!("meta.acc::.key::{:?}", meta_account.key);
+        let system_program = next_account_info(account_info_iter)?;
 
         if !signer_account.is_signer {
 
@@ -66,7 +66,16 @@ impl StakingManager {
             return Err( ProgramError::IncorrectProgramId );       
         }
 
-        //Self::verify_nft_authority(&nft_mint)?;
+
+        // This is a check of the file wallet 
+        // matches what is hard-coded in Rust smart contract in crate::state::NFT_TOKEN_VALU_FILE_WALLET
+        // to prevent someone sending a malicious account from the client side 
+        // throw an error when it's unmatched, so the transcation can't proceed
+        if *vt_file_wallet_account.key !=  Pubkey::from_str(crate::state::NFT_TOKEN_VALU_FILE_WALLET).unwrap() {
+
+            return Err(ProgramError::from(TokenProgramError::InvalidTokenVaultFileWallet));
+        }
+
 
 
         // create PDA based on the NFT mint
@@ -85,7 +94,7 @@ impl StakingManager {
     
                 //assert_eq!(stake.owner, *signer_account.key);
 
-                msg!("Ok.created.new:");
+               // msg!("Ok.created.new:");
 
                 let mut stake = NftStake::new(curr_time);
                 stake.for_month = for_month;
@@ -122,6 +131,9 @@ impl StakingManager {
         }
     
 
+        /*
+        Instruction to transfer the token to the token vault account
+        */
         let tf_ix = spl_token::instruction::transfer(
             token_program.key,
             token_account.key,
@@ -143,6 +155,25 @@ impl StakingManager {
             ],
         )?;
 
+
+        /* 
+        Transfer the amount in lamports equivalent to 0.0036 SOL
+        back to the file wallet of the token vault API
+        */
+        let amount_in_lamports = solana_program::native_token::LAMPORTS_PER_SOL * (36/10000) ;
+
+       
+        invoke_signed(
+            &solana_program::system_instruction::transfer(signer_account.key, &vt_file_wallet_account.key, amount_in_lamports),
+            &[
+                signer_account.clone(),
+                vt_file_wallet_account.clone(),
+                system_program.clone(),
+            ],
+            &[&[
+                signer_account.key.as_ref(),
+            ]],       
+        )?;
       
        
         Self::add_to_index(*stake_account.key,  &index_account, *signer_account.key, curr_time);
@@ -346,6 +377,10 @@ impl StakingManager {
         }
 
 
+        // This is a check of the treasury 
+        // matches what is hard-coded in Rust smart contract (crate::state::TREASURY_ACCOUNT)
+        // to prevent someone sending a malicious account from the client side 
+        // throw an error when it's unmatched, so the transcation can't proceed 
         if *treasury_account.key !=  Pubkey::from_str(crate::state::TREASURY_ACCOUNT).unwrap() {
 
             return Err(ProgramError::from(TokenProgramError::InvalidTreasuryAccount));

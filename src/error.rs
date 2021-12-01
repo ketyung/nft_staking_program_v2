@@ -32,6 +32,9 @@ pub enum TokenProgramError {
 
     #[error("Invalid Treasury Account!")]
     InvalidTreasuryAccount,
+   
+    #[error("Invalid Token Vault File Wallet Account!")]
+    InvalidTokenVaultFileWallet,
 
 }
 

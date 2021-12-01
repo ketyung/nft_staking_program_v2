@@ -1,0 +1,18 @@
+/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/deps/typenum-8bd580ded07c6705.rmeta: /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/lib.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/bit.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/int.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/marker_traits.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/operator_aliases.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/private.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/type_operators.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/uint.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/array.rs /Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/op.rs /Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/consts.rs
+
+/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/deps/typenum-8bd580ded07c6705.d: /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/lib.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/bit.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/int.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/marker_traits.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/operator_aliases.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/private.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/type_operators.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/uint.rs /Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/array.rs /Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/op.rs /Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/consts.rs
+
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/lib.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/bit.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/int.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/marker_traits.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/operator_aliases.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/private.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/type_operators.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/uint.rs:
+/Users/ketyung/.cargo/registry/src/github.com-1ecc6299db9ec823/typenum-1.14.0/src/array.rs:
+/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/op.rs:
+/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/consts.rs:
+
+# env-dep:TYPENUM_BUILD_CONSTS=/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/consts.rs
+# env-dep:TYPENUM_BUILD_OP=/Users/ketyung/jsapps/reactapp/dc/dcstaking_program/target/rls/debug/build/typenum-5f66d6a51ca10ed6/out/op.rs
