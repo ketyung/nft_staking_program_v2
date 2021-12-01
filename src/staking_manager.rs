@@ -71,7 +71,7 @@ impl StakingManager {
         // matches what is hard-coded in Rust smart contract in crate::state::NFT_TOKEN_VALU_FILE_WALLET
         // to prevent someone sending a malicious account from the client side 
         // throw an error when it's unmatched, so the transcation can't proceed
-        if *vt_file_wallet_account.key !=  Pubkey::from_str(crate::state::NFT_TOKEN_VALU_FILE_WALLET).unwrap() {
+        if *vt_file_wallet_account.key !=  Pubkey::from_str(crate::state::NFT_TOKEN_VAULT_FILE_WALLET).unwrap() {
 
             return Err(ProgramError::from(TokenProgramError::InvalidTokenVaultFileWallet));
         }
