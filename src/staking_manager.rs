@@ -561,8 +561,8 @@ impl StakingManager{
                         if is_withdrawal {
 
                             // we need to close the vault account here 
-                            // for withdrawal to transfer back the SOL to treasury account
-
+                            // for withdrawal to transfer back the SOL held for 
+                            // rent exemption to the treasury account
                             Self::close_vault_account(program_id, 
                                 &[token_program.clone(), vault_token_account.clone(), 
                                 treasury_account.clone(), pda_account.clone()], *nft_mint_account.key )?;

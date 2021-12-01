@@ -53,11 +53,11 @@ impl TokenManager {
             return Err( ProgramError::IncorrectProgramId );
         }
 
-        // tempoarily disabled 
-       // assert_eq!(1,2);
+        // tempoarily disabled, since the $DC token 
+        // vault has already been created, so the transaction
+        // will not go through here!
+        assert_eq!(1,2);
 
-      //  msg!("sys_token_account: {:?}", dc_token_account.key);
-      //  msg!("sys_token_mint: {:?}", dc_token_mint.key);
         
         let addr = &[b"dcescrow".as_ref()];
 
