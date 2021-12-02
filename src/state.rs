@@ -10,7 +10,7 @@ use solana_program::{
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
 
-pub const DC_TOKEN_DECIMAL : u32 = 6; // mainnet is 9
+pub const DC_TOKEN_DECIMAL : u32 = 6; // mainnet is 9, devnet is 6
 
 
 pub const NFT_TOKEN_VAULT_FILE_WALLET : &str =
