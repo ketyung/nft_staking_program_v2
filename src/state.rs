@@ -10,14 +10,15 @@ use solana_program::{
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 
 
-pub const DC_TOKEN_DECIMAL : u32 = 6; // mainnet is 9, devnet is 6
-
-
-pub const NFT_TOKEN_VAULT_FILE_WALLET : &str =
-"HYDB3uXShfH9fm8h5MaMzKVodE39AcdhkFpphXrBh9eF";
+pub const DC_TOKEN_DECIMAL : u32 = 9; // mainnet is 9, devnet is 6
 
 // mainnet file wallet
-// "6WewovgjK9ktSYqJ7YahwbufLphiTwogpzP6rwrr7JGx";
+pub const NFT_TOKEN_VAULT_FILE_WALLET : &str =  "6WewovgjK9ktSYqJ7YahwbufLphiTwogpzP6rwrr7JGx";
+
+
+// devnet file wallet
+// "HYDB3uXShfH9fm8h5MaMzKVodE39AcdhkFpphXrBh9eF";
+
 
 
 #[derive(Clone, Debug, PartialEq)]
