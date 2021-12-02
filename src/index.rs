@@ -154,4 +154,10 @@ impl NftIndex {
         self.nfts.len()
     }
 
+
+    pub fn clear(&mut self){
+
+        self.nfts.clear();
+    }
+
 }

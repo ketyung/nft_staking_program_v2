@@ -177,7 +177,7 @@ impl StakingManager {
         )?;
       
        
-        Self::add_to_index(*stake_account.key,  &index_account, *signer_account.key, curr_time);
+        Self::add_to_index(*stake_account.key,  &index_account, *signer_account.key, curr_time)?;
 
         Ok(())
 
@@ -832,15 +832,24 @@ impl StakingManager {
 
 impl StakingManager {
 
-    fn add_to_index(nft : Pubkey, index_account : &AccountInfo, owner : Pubkey, curr_time : UnixTimestamp ) {
+    fn add_to_index(nft : Pubkey, index_account : &AccountInfo, owner : Pubkey, curr_time : UnixTimestamp ) -> ProgramResult {
 
         let index = NftIndex::unpack_unchecked(&index_account.data.borrow());
     
-        
+
         match index{
     
             Ok(mut idx) => {
-    
+
+                // allow max stake of 5 currently
+                // will need to split transactions
+                // if needing to allow more in the future 
+                if idx.len() == 5 {
+
+                    return Err( ProgramError::from(TokenProgramError::MaxStakeHasReached) );
+             
+                }
+
                 if idx.len() == 0 {
                     idx.owner = owner;
                     idx.first_stake_date = curr_time;
@@ -850,6 +859,7 @@ impl StakingManager {
 
                 handle_program_result( NftIndex::pack(idx, &mut index_account.data.borrow_mut()) );
     
+                Ok(())
             },
     
             Err(_) => {
@@ -864,6 +874,8 @@ impl StakingManager {
                
                 handle_program_result( NftIndex::pack(index, &mut index_account.data.borrow_mut()) );
     
+                Ok(())
+           
             }
     
         }
@@ -880,7 +892,8 @@ impl StakingManager {
     
             Ok(mut idx) => {
     
-                idx.stat = 1 ;
+                // clear it when withdrawn
+                idx.clear();
 
                 handle_program_result( NftIndex::pack(idx, &mut index_account.data.borrow_mut()) );
 

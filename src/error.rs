@@ -36,6 +36,10 @@ pub enum TokenProgramError {
     #[error("Invalid Token Vault File Wallet Account!")]
     InvalidTokenVaultFileWallet,
 
+    #[error("Max Stake Has Reached!")]
+    MaxStakeHasReached,
+
+
 }
 
 
