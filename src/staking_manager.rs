@@ -351,6 +351,8 @@ impl StakingManager {
       
 
 
+        msg!("withdrawing...");
+        
         msg!("signer_acc::{:?}", signer_account.key);
         msg!("dc.token.mint::{:?}", dc_token_mint.key);
         msg!("dc.token.acc::{:?}", dc_token_account.key);
