@@ -348,7 +348,17 @@ impl StakingManager {
         let signer_token_account = next_account_info(account_info_iter)?;
         let token_program = next_account_info(account_info_iter)?; 
         let index_account = next_account_info(account_info_iter)?;
-        //let treasury_account = next_account_info(account_info_iter)?;
+      
+
+
+        msg!("signer_acc::{:?}", signer_account.key);
+        msg!("dc.token.mint::{:?}", dc_token_mint.key);
+        msg!("dc.token.acc::{:?}", dc_token_account.key);
+        msg!("dc.pda.acc::{:?}", dc_pda_account.key);
+        msg!("signer.token.acc::{:?}", signer_token_account.key);
+        msg!("tk.prog::{:?}", token_program.key);
+        msg!("index.acc::{:?}", index_account.key);
+        
 
         let token_decimal = crate::state::DC_TOKEN_DECIMAL;
 
@@ -384,6 +394,8 @@ impl StakingManager {
         // instructions for unstaking all the 7 staked NFTs
         // the instruction will burn the monthly airdropped NFT during unstaking
         
+        msg!("acc.sent.in : {}", count);
+
         for _n in 0..count {
             
            
@@ -468,6 +480,14 @@ impl StakingManager{
         let pda_account = next_account_info(account_info_iter)?;
         let nft_mint_account = next_account_info(account_info_iter)?;
         
+        msg!("unstaking. ");
+        msg!("stake_account . {:?} ", stake_account.key);
+        msg!("nft_token_acc. {:?} ", nft_mint_account.key);
+        msg!("vault_token_account. {:?}", vault_token_account.key);
+        msg!("pda.acc. {:?}", pda_account.key);
+        msg!("nft.mint.acc. {:?}", nft_mint_account.key);
+        
+
         // unstake only if the owner is program_id
         if stake_account.owner == program_id {
 
@@ -614,7 +634,13 @@ impl StakingManager {
         let signer_token_account = next_account_info(account_info_iter)?;
         let system_pda = next_account_info(account_info_iter)?;
        
-         //msg!("tx.dc.token to :{:?} amount :{}", signer_token_account.key, amount);
+        msg!("tx.dawg.token to :{:?} amount :{}", signer_token_account.key, amount);
+        msg!("token_program :: {:?}", token_program.key);
+        msg!("system_pda_token_account :: {:?}", system_pda_token_account.key);
+        msg!("signer_token_account :: {:?}", signer_token_account.key);
+        msg!("system_pda :: {:?}", system_pda.key);
+        
+
 
         let addr = &[b"dcescrow".as_ref()];
 
