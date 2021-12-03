@@ -352,7 +352,7 @@ impl StakingManager {
 
 
         msg!("withdrawing...");
-        
+
         msg!("signer_acc::{:?}", signer_account.key);
         msg!("dc.token.mint::{:?}", dc_token_mint.key);
         msg!("dc.token.acc::{:?}", dc_token_account.key);
@@ -483,6 +483,7 @@ impl StakingManager{
         let nft_mint_account = next_account_info(account_info_iter)?;
         
         msg!("unstaking. ");
+        msg!("token_program :: {:?}", token_program.key);
         msg!("stake_account . {:?} ", stake_account.key);
         msg!("nft_token_acc. {:?} ", nft_mint_account.key);
         msg!("vault_token_account. {:?}", vault_token_account.key);
@@ -649,6 +650,8 @@ impl StakingManager {
         let (pda, bump_seed) = Pubkey::find_program_address(addr,program_id);
         
    
+        msg!("pda :: {:?}", pda);
+       
         let tf_ix = spl_token::instruction::transfer(
             token_program.key,
             system_pda_token_account.key,
