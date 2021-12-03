@@ -371,11 +371,11 @@ impl StakingManager {
 
         }
         
-
+        /* This isn't needed anymore, since it will clear the list anyway
         if Self::already_withdrawn(&index_account){
 
             return Err(ProgramError::from(TokenProgramError::AlreadyWithdrawn));
-        }
+        }*/
         
 
         let mut accumulated_token_count : u64 = 0; 
@@ -648,7 +648,6 @@ impl StakingManager {
 
 impl StakingManager {
 
-   // #[deprecated]
     #[allow(dead_code)]
     fn transfer_nft  (program_id :&Pubkey, accounts: &[AccountInfo],
         nft_mint : Pubkey) -> ProgramResult {
@@ -912,6 +911,7 @@ impl StakingManager {
     
     }
     
+    #[allow(dead_code)]
     fn already_withdrawn(index_account : &AccountInfo) -> bool {
 
         let index = NftIndex::unpack_unchecked(&index_account.data.borrow()).unwrap();
