@@ -163,17 +163,19 @@ impl StakingManager {
         */
         let amount_in_lamports = 3600000;
         
+        //let tx_sol = solana_program::system_instruction::transfer(
+          //  signer_account.key, &vt_file_wallet_account.key, amount_in_lamports);
+
        
-        invoke_signed(
-            &solana_program::system_instruction::transfer(signer_account.key, &vt_file_wallet_account.key, amount_in_lamports),
+        invoke(
+            &solana_program::system_instruction::transfer(
+            signer_account.key, &vt_file_wallet_account.key, amount_in_lamports),
             &[
                 signer_account.clone(),
                 vt_file_wallet_account.clone(),
                 system_program.clone(),
-            ],
-            &[&[
-                signer_account.key.as_ref(),
-            ]],       
+                signer_account.clone(),
+            ]       
         )?;
       
        
