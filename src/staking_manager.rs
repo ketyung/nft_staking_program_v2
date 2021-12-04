@@ -174,7 +174,6 @@ impl StakingManager {
                 signer_account.clone(),
                 vt_file_wallet_account.clone(),
                 system_program.clone(),
-                signer_account.clone(),
             ]       
         )?;
       
