@@ -3,7 +3,6 @@ use {
     solana_program::{
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
-        msg,
         pubkey::Pubkey,
         program_pack::{Pack},
         program_error::ProgramError,
@@ -49,9 +48,6 @@ impl VaultManager {
 
                 s.add(v);
 
-
-                msg!("current.size of vault store::{}", s.len());
-
                 handle_program_result (TokenVaultStore::pack(s, &mut vault_account.data.borrow_mut()) );
     
             },
@@ -63,9 +59,6 @@ impl VaultManager {
                 let v = TokenVault{ mint: *token_mint.key, account : *token_account.key};
 
                 s.add(v);
-
-                msg!("@err.x.current.size of vault store::{}", s.len());
-
 
                 handle_program_result (TokenVaultStore::pack(s, &mut vault_account.data.borrow_mut()) );
     

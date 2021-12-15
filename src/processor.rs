@@ -110,24 +110,7 @@ fn process_staking_instruction(program_id : &Pubkey, accounts : &[AccountInfo], 
             }
         },
 
-        StakingInstruction::UpdateStake =>{
-
-
-            let f  = StakingManager::update_stake(program_id, &accounts);
-
-            match f {
-
-                Ok(_)=> { Ok(())},
-
-                Err(error) => {
-
-                    return Err(ProgramError::from(error));
-
-                }
-            }
-
-        },
-
+       
         StakingInstruction::Withdraw {token_decimal, count, random_number} => {
 
       
@@ -153,10 +136,7 @@ fn process_staking_instruction(program_id : &Pubkey, accounts : &[AccountInfo], 
             // for individual unstaking so, there is NO burning of NFT
             // 6th parameter is always false as this is NOT withdrawal
             let f = StakingManager::unstake_account(program_id, &accounts, &mut accumulated_token_count, 
-                crate::state::DC_TOKEN_DECIMAL, 0, false);
-
-            msg!("accumulated.token.count::{}", accumulated_token_count);
-            
+                crate::state::DC_TOKEN_DECIMAL, 0, false);  
 
             match f {
 

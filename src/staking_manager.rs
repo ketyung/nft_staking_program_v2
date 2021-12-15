@@ -188,57 +188,6 @@ impl StakingManager {
 
 impl StakingManager {
 
-    // to be called by bot to update the reward
-    pub fn update_stake(program_id: &Pubkey, accounts: &[AccountInfo])  -> ProgramResult {
-
-        let account_info_iter = &mut accounts.iter();
-
-        let stake_account = next_account_info(account_info_iter)?;
-    
-        if stake_account.owner != program_id {
-
-            return Err( ProgramError::IncorrectProgramId );
-        }
-
-        let stored_stake = NftStake::unpack_unchecked(&stake_account.data.borrow());
-   
-
-        match stored_stake {
-
-            Ok(mut stake) => {
-    
-                let curr_time = Clock::get().unwrap().unix_timestamp;
-
-                let time_diff = (curr_time - stake.stake_date)/60/1000;
-
-                let rate = determine_rate(stake.for_month);
-
-                // 6 decimals
-                stake.token_reward = ((( u64::try_from(time_diff).unwrap() * rate) / 86400) * 1000_000) as u64;
-
-                stake.last_update = curr_time;
-
-                handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
-
-            },
-
-            Err(error) => {
-    
-                return Err(ProgramError::from(error));
-
-            }
-
-        }
-
-        Ok(())
-
-    }
-
-}
-
-
-impl StakingManager {
-
     pub fn restake (program_id: &Pubkey, accounts: &[AccountInfo], for_month : u8) -> ProgramResult{
 
 
@@ -248,8 +197,6 @@ impl StakingManager {
         
         let stake_account = next_account_info(account_info_iter)?;
     
-       // let nft_mint = next_account_info(account_info_iter)?;
-
         let token_account = next_account_info(account_info_iter)?; 
 
         let vault_token_account = next_account_info(account_info_iter)?;
@@ -267,8 +214,6 @@ impl StakingManager {
             return Err( ProgramError::IncorrectProgramId );
         }
 
-       // Self::verify_nft_authority(&nft_mint)?;
-
         let token_program = next_account_info(account_info_iter)?;
 
         let curr_time =  Clock::get().unwrap().unix_timestamp;
@@ -282,9 +227,6 @@ impl StakingManager {
                 if stake.stat == 1 {
 
                     assert_eq!(for_month, stake.for_month);
-
-                    
-                    //msg!("to return reward::{}", stake_reward);
 
                     stake.stake_date = curr_time;
                     stake.stat = 0; 
@@ -350,18 +292,6 @@ impl StakingManager {
         let token_program = next_account_info(account_info_iter)?; 
         let index_account = next_account_info(account_info_iter)?;
       
-
-        /*
-        msg!("withdrawing...");
-        msg!("signer_acc::{:?}", signer_account.key);
-        msg!("dc.token.mint::{:?}", dc_token_mint.key);
-        msg!("dc.token.acc::{:?}", dc_token_account.key);
-        msg!("dc.pda.acc::{:?}", dc_pda_account.key);
-        msg!("signer.token.acc::{:?}", signer_token_account.key);
-        msg!("tk.prog::{:?}", token_program.key);
-        msg!("index.acc::{:?}", index_account.key);
-        */
-
         let token_decimal = crate::state::DC_TOKEN_DECIMAL;
 
         if !signer_account.is_signer {
@@ -382,22 +312,14 @@ impl StakingManager {
             return Err(ProgramError::IncorrectProgramId);
 
         }
-        
-        /* This isn't needed anymore, since it will clear the list anyway
-        if Self::already_withdrawn(&index_account){
-
-            return Err(ProgramError::from(TokenProgramError::AlreadyWithdrawn));
-        }*/
-        
+         
 
         let mut accumulated_token_count : u64 = 0; 
-
 
         // instructions for unstaking all the 7 staked NFTs
         // the instruction will burn the monthly airdropped NFT during unstaking
         
-        msg!("acc.sent.in : {}", count);
-
+    
         for _n in 0..count {
             
            
@@ -413,17 +335,7 @@ impl StakingManager {
             let vault_token_account = next_account_info(account_info_iter)?;
             let nft_pda_account = next_account_info(account_info_iter)?;
             let nft_mint_account = next_account_info(account_info_iter)?;
-            
-
-            /*
-            let token_program = next_account_info(account_info_iter)?;
-            let stake_account = next_account_info(account_info_iter)?;
-            let nft_token_account = next_account_info(account_info_iter)?;
-            let vault_token_account = next_account_info(account_info_iter)?;
-            let pda_account = next_account_info(account_info_iter)?;
-            */
-
-            
+              
             let accs = &[token_program.clone(),  
             stake_account.clone(), nft_token_account.clone(),
             vault_token_account.clone(), nft_pda_account.clone(), 
@@ -433,20 +345,10 @@ impl StakingManager {
             handle_program_result( Self::unstake_account(&program_id, accs, &mut accumulated_token_count, 
                 token_decimal, random_number, true) );
 
-          //  msg!("acc.count::{}", accumulated_token_count);
-
+      
 
         }
 
-
-       
-        /*
-        let token_program = next_account_info(account_info_iter)?;
-        let system_pda_token_account = next_account_info(account_info_iter)?;
-        let signer_token_account = next_account_info(account_info_iter)?;
-        let system_pda = next_account_info(account_info_iter)?;
-        */
-       
         // accumulated_token_count already includes 
         // the token decimal, so there is NO need to multiply 
         // token decimal
@@ -469,6 +371,9 @@ const REWARD_BASED_ON_TIME : u64 = 86400;
 
 impl StakingManager{
 
+     /**
+      * The function to unstake
+      */
      pub fn unstake_account (program_id: &Pubkey, accounts: &[AccountInfo],
         accumulated_token_count : &mut u64, token_decimal : u32, to_burn_random : u8, 
         is_withdrawal : bool) -> ProgramResult {
@@ -481,17 +386,7 @@ impl StakingManager{
         let vault_token_account = next_account_info(account_info_iter)?;
         let pda_account = next_account_info(account_info_iter)?;
         let nft_mint_account = next_account_info(account_info_iter)?;
-        /*
-        msg!("unstaking. ");
-        msg!("token_program :: {:?}", token_program.key);
-        msg!("stake_account . {:?} ", stake_account.key);
-        msg!("nft_token_acc. {:?} ", nft_mint_account.key);
-        msg!("vault_token_account. {:?}", vault_token_account.key);
-        msg!("pda.acc. {:?}", pda_account.key);
-        msg!("nft.mint.acc. {:?}", nft_mint_account.key);
-        */
-
-        // unstake only if the owner is program_id
+       
         if stake_account.owner == program_id {
 
             let stored_stake = NftStake::unpack_unchecked(&stake_account.data.borrow());
@@ -506,11 +401,8 @@ impl StakingManager{
                     let rate = determine_rate(stake.for_month);
 
                     
-                    // if it's staked 
                     if  stake.stat == 0 {
 
-                        // time difference calculated 
-                        // from the stake_date till current datetime
                         let time_diff = curr_time - stake.stake_date;
                     
                         let ten : u64 = 10;
@@ -519,9 +411,6 @@ impl StakingManager{
         
                         let time_diff_earned : u64 = u64::try_from(time_diff).unwrap() * rate;
     
-                       // let ratio = StakingManager::convert( time_diff_earned).unwrap_or(0.0) / 
-                       // StakingManager::convert(REWARD_BASED_ON_TIME).unwrap_or(0.0);
-
                         let ratio = (StakingManager::convert( time_diff_earned).unwrap_or(0.0) / 
                         StakingManager::convert(REWARD_BASED_ON_TIME).unwrap_or(0.0) ) * 100000.0 ;
 
@@ -628,6 +517,9 @@ impl StakingManager{
 impl StakingManager {
 
 
+    /**
+     * The function to tx the dc token 
+     */
     fn transfer_dc_token  (program_id :&Pubkey, accounts: &[AccountInfo], amount : u64 ) -> ProgramResult {
         
         let account_info_iter = &mut accounts.iter();
@@ -637,21 +529,10 @@ impl StakingManager {
         let signer_token_account = next_account_info(account_info_iter)?;
         let system_pda = next_account_info(account_info_iter)?;
        
-        /*
-        msg!("tx.dawg.token to :{:?} amount :{}", signer_token_account.key, amount);
-        msg!("token_program :: {:?}", token_program.key);
-        msg!("system_pda_token_account :: {:?}", system_pda_token_account.key);
-        msg!("signer_token_account :: {:?}", signer_token_account.key);
-        msg!("system_pda :: {:?}", system_pda.key);
-        */
-
         let addr = &[b"dcescrow".as_ref()];
 
         let (pda, bump_seed) = Pubkey::find_program_address(addr,program_id);
         
-   
-        msg!("pda :: {:?}", pda);
-       
         let tf_ix = spl_token::instruction::transfer(
             token_program.key,
             system_pda_token_account.key,
@@ -686,36 +567,15 @@ impl StakingManager {
 
         let account_info_iter = &mut accounts.iter();
 
-        /* // follow this order 
-        let accs = &[token_program.clone(), 
-        nft_token_account.clone(), vault_token_account.clone(), 
-        pda_account.clone() ];
-
-        */
-
         let token_program = next_account_info(account_info_iter)?;
         let nft_token_account = next_account_info(account_info_iter)?;
         let vault_token_account = next_account_info(account_info_iter)?;
         let pda_account = next_account_info(account_info_iter)?;
-
-        /*
-        msg!("rs.token_prog::{:?}", token_program.key);
-        msg!("rs.pda_acc::{:?}", pda_account.key);
-        msg!("rs.pda::{}", pda);
-        */
-
-
-       // msg!("rs.nft_token_acc::{:?}", nft_token_account.key);
-       // msg!("rs.vault_token_acc::{:?}", vault_token_account.key);
-       // msg!("rs.pda_acc::{:?}", pda_account.key);
-      
+ 
         let addr = &[nft_mint.as_ref()];
 
         let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
         
-        
-       // msg!("tx.token.back");
-
         let tf_ix = spl_token::instruction::transfer(
             token_program.key,
             vault_token_account.key,
@@ -737,11 +597,7 @@ impl StakingManager {
 
         match f {
 
-            Ok(_) => {
-
-               // msg!("tx back from::{:?} to :{:?}", vault_token_account.key,  nft_token_account.key);
-          
-            },
+            Ok(_) => { },
 
             Err(e) => {
 
@@ -764,14 +620,11 @@ impl StakingManager {
         let nft_mint_account = next_account_info(account_info_iter)?;
         let vault_token_account = next_account_info(account_info_iter)?;
         
-        // create PDA based on the NFT mint
-
       
         let addr = &[nft_mint.as_ref()];
          
         let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
         
-       // msg!("pda:{:?}", pda);
        
         let burn_ins = spl_token::instruction::burn(
             token_program.key,
@@ -786,8 +639,6 @@ impl StakingManager {
         let accs =   &[token_program.clone(),nft_pda_account.clone(), nft_mint_account.clone(),
         vault_token_account.clone()];
       
-        //let burned = invoke(&burn_ins, accs);
-
         let burned = invoke_signed(&burn_ins,
             accs,
             &[&[&addr[0][..], &[bump_seed]]],
@@ -796,10 +647,7 @@ impl StakingManager {
 
         match burned {
 
-            Ok(_) =>{
-
-               // msg!("Burned :{:?}", s);
-            }
+            Ok(_) =>{}
             ,
             Err(e) =>{
 
@@ -830,7 +678,6 @@ impl StakingManager {
         let (pda, bump_seed) = Pubkey::find_program_address(addr, program_id);
       
        
-        msg!("pda:{:?}, {:?}",pda, pda_account.key);
        
         let close_vault_acc_ix = spl_token::instruction::close_account(
             token_program.key,
@@ -840,8 +687,6 @@ impl StakingManager {
             &[&pda]
         )?;
         
-        msg!("Calling the token program to close vault token account... and transfer back sol to {:?}", 
-        treasury_account.key);
         
         invoke_signed(
             &close_vault_acc_ix,

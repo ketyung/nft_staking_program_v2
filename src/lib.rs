@@ -9,5 +9,3 @@ pub mod index;
 pub mod staking_instruction;
 pub mod vault;
 pub mod vault_manager;
-
-// solana_program::declare_id!("8jir4wAH4PuYamUkVD12xwvMHXxsLUFDcFNG34uh78iZ");

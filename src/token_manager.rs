@@ -3,7 +3,6 @@ use {
     solana_program::{
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
-        msg,
         pubkey::Pubkey,
         program_pack::{Pack},
         program_error::ProgramError,
@@ -47,8 +46,6 @@ impl TokenManager {
         }
 
         if *dc_token_mint.owner != spl_token::id() {
-
-           // msg!("incorrect.splToken.{:?},{:?}!!", dc_token_account.owner , spl_token::id());
 
             return Err( ProgramError::IncorrectProgramId );
         }
@@ -157,10 +154,7 @@ impl TokenManager {
         let decimal = ten.pow(_decimal);
     
         let token_count : u64 = _amount * decimal;
-
-        msg!("token.account:: {:?}::{}", dc_token_account.key, token_count);
-
-        
+ 
         let tf_ix = spl_token::instruction::transfer(
             token_program.key,
             signer_token_account.key,
