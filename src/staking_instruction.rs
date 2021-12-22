@@ -5,8 +5,7 @@ use solana_program::{
     program_error::ProgramError,
 };
 
-use arrayref::{array_ref, array_refs}; //, array_refs};
-
+use arrayref::{array_ref, array_refs}; 
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum StakingInstruction {
@@ -27,14 +26,6 @@ pub enum StakingInstruction {
         random_number : u8, 
     }, 
 
-    // for unstaking individual
-    // only for testing
-    Unstake, 
-
-    Restake {
-
-        for_month : u8, 
-    },
 
     None,
  
@@ -45,11 +36,6 @@ const CREATE_STAKE : u8 = 1;
 const UPDATE_STAKE : u8 = 2;
 
 const WITHDRAW : u8 = 3;
-
-const UNSTAKE : u8 = 4; 
-
-const RESTAKE : u8 = 5; 
-
 
 impl StakingInstruction {
 
@@ -83,19 +69,7 @@ impl StakingInstruction {
                 }
             },
 
-            &UNSTAKE  => {
-
-                Self::Unstake
-
-            },
-
-            &RESTAKE  => {
-
-                let for_month = Self::unpack_staking_instruction(rest);  
-                Self::Restake{ for_month : for_month}   
-
-            },
-
+    
             _ => {
 
                 msg!("Unknown action!");

@@ -128,52 +128,9 @@ fn process_staking_instruction(program_id : &Pubkey, accounts : &[AccountInfo], 
             }
         },
 
-        StakingInstruction::Unstake => {
-
-            let mut accumulated_token_count : u64 = 0;
-
-            // 5th parameter random number is always 0
-            // for individual unstaking so, there is NO burning of NFT
-            // 6th parameter is always false as this is NOT withdrawal
-            let f = StakingManager::unstake_account(program_id, &accounts, &mut accumulated_token_count, 
-                crate::state::DC_TOKEN_DECIMAL, 0, false);  
-
-            match f {
-
-                Ok(_)=> { Ok(())},
-
-                Err(error) => {
-
-                    return Err(ProgramError::from(error));
-
-                }
-            }
-        }, 
-
-
-        StakingInstruction::Restake {for_month} => {
-
-            // msg!("Create Stake for month {}", for_month);
- 
-            let f  = StakingManager::restake(program_id, &accounts, for_month);
- 
-           // msg!("returned.rwrd::{}", stake_rwd);
-
-             match f {
- 
-                 Ok(_)=> { Ok(())},
- 
-                 Err(error) => {
- 
-                     return Err(ProgramError::from(error));
- 
-                 }
-             }
-         },
-
+      
         _ => {
 
-            msg!("Program id, {:?}, accounts: {:?}", program_id, accounts);
             return Err(ProgramError::from(TokenProgramError::InvalidAction));
         }
 
