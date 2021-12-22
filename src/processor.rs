@@ -14,6 +14,10 @@ use {
     crate::vault_manager::VaultManager,
 };
 
+/**
+Code clean-up in progress and commenting
+by Christopher Chee 
+*/
 
 const MOD_TOKEN : u8 = 1;
 
