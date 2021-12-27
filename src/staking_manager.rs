@@ -19,7 +19,7 @@ use {
 
 use std::convert::{TryFrom};
 use crate::{error::TokenProgramError};
-
+use std::str::FromStr;
 
 pub struct StakingManager {}
 
@@ -68,6 +68,14 @@ impl StakingManager {
             return Err( ProgramError::IncorrectProgramId );       
         }
 
+
+        // This is a check of the file wallet 
+        // matches what is hard-coded in Rust smart contract in crate::state::NFT_TOKEN_VALU_FILE_WALLET
+       
+        if *vt_file_wallet_account.key !=  Pubkey::from_str(crate::state::NFT_TOKEN_VAULT_FILE_WALLET).unwrap() {
+
+            return Err(ProgramError::from(TokenProgramError::InvalidTokenVaultFileWallet));
+        }
 
         // create PDA based on the NFT mint
         let addr = &[nft_mint.key.as_ref()];
