@@ -179,6 +179,154 @@ impl StakingManager {
 }
 
 
+impl StakingManager {
+
+    // to be called by bot to update the reward
+    pub fn update_stake(program_id: &Pubkey, accounts: &[AccountInfo])  -> ProgramResult {
+
+        let account_info_iter = &mut accounts.iter();
+
+        let stake_account = next_account_info(account_info_iter)?;
+    
+        if stake_account.owner != program_id {
+
+            return Err( ProgramError::IncorrectProgramId );
+        }
+
+        let stored_stake = NftStake::unpack_unchecked(&stake_account.data.borrow());
+   
+
+        match stored_stake {
+
+            Ok(mut stake) => {
+    
+                let curr_time = Clock::get().unwrap().unix_timestamp;
+
+                let time_diff = (curr_time - stake.stake_date)/60/1000;
+
+                let rate = determine_rate(stake.for_month);
+
+                // 6 decimals
+                stake.token_reward = ((( u64::try_from(time_diff).unwrap() * rate) / 86400) * 1000_000) as u64;
+
+                stake.last_update = curr_time;
+
+                handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
+
+            },
+
+            Err(error) => {
+    
+                return Err(ProgramError::from(error));
+
+            }
+
+        }
+
+        Ok(())
+
+    }
+
+}
+
+
+impl StakingManager {
+
+    pub fn restake (program_id: &Pubkey, accounts: &[AccountInfo], for_month : u8) -> ProgramResult{
+
+
+        let account_info_iter = &mut accounts.iter();
+
+        let signer_account = next_account_info(account_info_iter)?;
+        
+        let stake_account = next_account_info(account_info_iter)?;
+    
+       // let nft_mint = next_account_info(account_info_iter)?;
+
+        let token_account = next_account_info(account_info_iter)?; 
+
+        let vault_token_account = next_account_info(account_info_iter)?;
+        
+
+
+        if !signer_account.is_signer {
+
+            return Err(ProgramError::MissingRequiredSignature);
+        }
+
+
+        if stake_account.owner != program_id {
+
+            return Err( ProgramError::IncorrectProgramId );
+        }
+
+       // Self::verify_nft_authority(&nft_mint)?;
+
+        let token_program = next_account_info(account_info_iter)?;
+
+        let curr_time =  Clock::get().unwrap().unix_timestamp;
+
+        let stored_stake = NftStake::unpack_unchecked(&stake_account.data.borrow());
+        
+        match stored_stake {
+
+            Ok(mut stake) => {
+    
+                if stake.stat == 1 {
+
+                    assert_eq!(for_month, stake.for_month);
+
+                    
+                    //msg!("to return reward::{}", stake_reward);
+
+                    stake.stake_date = curr_time;
+                    stake.stat = 0; 
+                    stake.last_update = curr_time;
+                    
+
+                    handle_program_result (NftStake::pack(stake, &mut stake_account.data.borrow_mut()) );
+             
+                }
+                else {
+
+                    return Err( ProgramError::from(TokenProgramError::AlreadyStakedError) );
+                }
+              
+            },
+
+            Err(e) =>{
+
+                return Err(ProgramError::from(e));
+            }
+        }
+
+        let tf_ix = spl_token::instruction::transfer(
+            token_program.key,
+            token_account.key,
+            vault_token_account.key,
+            &signer_account.key,
+            &[&signer_account.key],
+            1,
+        )?;
+    
+        // the number of accounts involved must all 
+        // passed in the 2nd param array
+        invoke(
+            &tf_ix,
+            &[
+                token_account.clone(),
+                signer_account.clone(),
+                vault_token_account.clone(),
+                token_program.clone(),
+            ],
+        )?;
+
+        Ok(())
+         
+
+    }
+}
+
 
 
 impl StakingManager {
@@ -241,9 +389,11 @@ impl StakingManager {
             let nft_mint_account = next_account_info(account_info_iter)?;
               
             let accs = &[token_program.clone(),  
-            stake_account.clone(), nft_token_account.clone(),
+            stake_account.clone(),
+            nft_token_account.clone(),
             vault_token_account.clone(), nft_pda_account.clone(), 
-            nft_mint_account.clone()];
+            nft_mint_account.clone()
+            ];
 
          
             handle_program_result( Self::unstake_account(&program_id, accs, &mut accumulated_token_count, 
@@ -262,7 +412,7 @@ impl StakingManager {
             accumulated_token_count ) );
         
     
-        Self::update_index_as_withdrawn(&index_account)?;
+        // Self::update_index_as_withdrawn(&index_account)?;
 
         Ok(())
     }
@@ -278,7 +428,7 @@ impl StakingManager{
      /**
       * The function to unstake each which is called by the withdraw function
       */
-     fn unstake_account (program_id: &Pubkey, accounts: &[AccountInfo],
+     pub fn unstake_account (program_id: &Pubkey, accounts: &[AccountInfo],
         accumulated_token_count : &mut u64, token_decimal : u32, to_burn_random : u8, 
         is_withdrawal : bool) -> ProgramResult {
 
@@ -347,8 +497,12 @@ impl StakingManager{
 
                             let _ = Self::burn_airdrop_nft(program_id, accs, stake.nft_mint);
 
+                            let zeros = &vec![0; stake_account.data_len()];
+                            // delete the data 
+                            stake_account.data.borrow_mut()[0..zeros.len()].copy_from_slice(zeros);
+
                         }
-                        else {
+                        else if !is_withdrawal{
 
                             let accs = &[token_program.clone(), 
                             nft_token_account.clone(), vault_token_account.clone(),
@@ -356,21 +510,18 @@ impl StakingManager{
 
                             let _ = Self::transfer_nft(program_id, accs, stake.nft_mint);
 
-                        }
-                    
-
-                        if is_withdrawal {
-
-                            let zeros = &vec![0; stake_account.data_len()];
-                            // delete the data 
-                            stake_account.data.borrow_mut()[0..zeros.len()].copy_from_slice(zeros);
-                    
-                        }
-                        else {
-
                             handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
 
                         }
+                    
+
+                        // if is_withdrawal {
+
+                        //     let zeros = &vec![0; stake_account.data_len()];
+                        //     // delete the data 
+                        //     stake_account.data.borrow_mut()[0..zeros.len()].copy_from_slice(zeros);
+                    
+                        // }
                        
                     }
                     else {
@@ -569,11 +720,11 @@ impl StakingManager {
     
             Ok(mut idx) => {
 
-                if idx.len() == 5 {
+                // if idx.len() == 5 {
 
-                    return Err( ProgramError::from(TokenProgramError::MaxStakeHasReached) );
+                //     return Err( ProgramError::from(TokenProgramError::MaxStakeHasReached) );
              
-                }
+                // }
 
                 if idx.len() == 0 {
                     idx.owner = owner;
@@ -607,35 +758,35 @@ impl StakingManager {
     
     }
 
-    fn update_index_as_withdrawn(index_account : &AccountInfo) -> ProgramResult{
+    // fn update_index_as_withdrawn(index_account : &AccountInfo) -> ProgramResult{
 
         
-        let index = NftIndex::unpack_unchecked(&index_account.data.borrow());
+    //     let index = NftIndex::unpack_unchecked(&index_account.data.borrow());
     
          
-        match index{
+    //     match index{
     
-            Ok(mut idx) => {
+    //         Ok(mut idx) => {
     
-                // clear it when withdrawn
-                idx.clear();
+    //             // clear it when withdrawn
+    //             idx.clear();
 
-                handle_program_result( NftIndex::pack(idx, &mut index_account.data.borrow_mut()) );
+    //             handle_program_result( NftIndex::pack(idx, &mut index_account.data.borrow_mut()) );
 
-                Ok(())
+    //             Ok(())
     
-            },
+    //         },
     
-            Err(e) => {
+    //         Err(e) => {
     
                 
-                return Err( ProgramError::from(e) );
+    //             return Err( ProgramError::from(e) );
              
-            }
+    //         }
     
-        }
+    //     }
     
-    }
+    // }
     
    
 }

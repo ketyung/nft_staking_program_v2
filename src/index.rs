@@ -9,7 +9,7 @@ use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 use std::convert::{TryFrom};
 
 
-pub const NFT_SIZE_LIMIT : usize = 12;
+pub const NFT_SIZE_LIMIT : usize = 32;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NftIndex {
@@ -129,6 +129,7 @@ impl NftIndex {
             if !self.nfts.contains(&pubkey){
 
                 self.nfts.push(pubkey);
+
             }
         }
 
@@ -143,6 +144,7 @@ impl NftIndex {
             self.nfts.remove(idx.unwrap());
         }
     }
+
   
     pub fn all(&self) -> Vec<Pubkey>{
 
