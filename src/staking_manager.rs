@@ -392,7 +392,7 @@ impl StakingManager {
             ];
             
             handle_program_result( Self::unstake_account(&program_id, accs, &mut accumulated_token_count, 
-                token_decimal, random_number, true,count) );  
+                token_decimal, random_number, true,_n) );  
 
         }
 
@@ -423,7 +423,7 @@ impl StakingManager{
       */
      pub fn unstake_account (program_id: &Pubkey, accounts: &[AccountInfo],
         accumulated_token_count : &mut u64, token_decimal : u32, to_burn_random : u8, 
-        is_withdrawal : bool, count : u8 ) -> ProgramResult {
+        is_withdrawal : bool,index : u8) -> ProgramResult {
 
         let account_info_iter = &mut accounts.iter();
 
@@ -432,10 +432,7 @@ impl StakingManager{
         let vault_token_account = next_account_info(account_info_iter)?;
         let pda_account = next_account_info(account_info_iter)?;
         let nft_mint_account = next_account_info(account_info_iter)?;
-
-        for _n in 0..count {
-
-        
+   
         let stake_account = next_account_info(account_info_iter)?;    
        
         if stake_account.owner == program_id {
@@ -446,7 +443,6 @@ impl StakingManager{
 
                 Ok(mut stake) => {
         
-
                     let curr_time = Clock::get().unwrap().unix_timestamp;
 
                     let rate = determine_rate(stake.for_month);
@@ -468,12 +464,8 @@ impl StakingManager{
                         let ratio_as_u64 = ratio as u64;
                      
                         let curr_reward =  (( ratio_as_u64 * decimal) as u64) / 100000;
-
                         
                         let new_token_reward = stake.token_reward + curr_reward;
-
-                        stake.token_reward = new_token_reward; 
-
                         
                         *accumulated_token_count += new_token_reward;
 
@@ -483,15 +475,13 @@ impl StakingManager{
 
                         stake.token_reward = 0;
 
-                        stake.stat = 1; // 1 indicates having withdrawn or unstaked
-
                         // check if the token is to be burnt
                         // the individual unstake function passes 
                         // a zero to_burn_random, so it doesn't burn 
                         // the token when an individual unstake function is executed 
                         let is_to_burn = to_burn_random != 0 && to_burn_random == stake.for_month;
 
-                        if is_to_burn && _n==0 {
+                        if is_to_burn && index==0 {
 
                             let accs = &[token_program.clone(), pda_account.clone(), nft_mint_account.clone(), 
                             vault_token_account.clone()];
@@ -505,7 +495,6 @@ impl StakingManager{
                         }
                         else if !is_withdrawal{
 
-                            msg!("Executing");
                             let accs = &[token_program.clone(), 
                             nft_token_account.clone(), vault_token_account.clone(),
                             pda_account.clone()];
@@ -514,8 +503,19 @@ impl StakingManager{
 
                         }
 
-                        if !is_withdrawal || (is_withdrawal && _n>0) {
-                        handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
+                        if is_withdrawal && index!=0{  
+                         
+                         stake.stat = 0;
+
+                         handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
+
+                        }
+                        else if !is_withdrawal{
+
+                          stake.stat = 1; // 1 indicates having withdrawn or unstaked  
+
+                          handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
+
                         }
                        
                     }
@@ -537,8 +537,6 @@ impl StakingManager{
                   
                 }
             }
-
-        }
     }
 
         Ok(())

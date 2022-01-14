@@ -158,7 +158,7 @@ fn process_staking_instruction(program_id : &Pubkey, accounts : &[AccountInfo], 
             // for individual unstaking so, there is NO burning of NFT
             // 6th parameter is always false as this is NOT withdrawal
             let f = StakingManager::unstake_account(program_id, &accounts, &mut accumulated_token_count, 
-                crate::state::DC_TOKEN_DECIMAL, 0, false,1);
+                crate::state::DC_TOKEN_DECIMAL, 0, false, 1);
 
             match f {
 
