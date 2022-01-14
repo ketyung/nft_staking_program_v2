@@ -160,9 +160,6 @@ fn process_staking_instruction(program_id : &Pubkey, accounts : &[AccountInfo], 
             let f = StakingManager::unstake_account(program_id, &accounts, &mut accumulated_token_count, 
                 crate::state::DC_TOKEN_DECIMAL, 0, false,1);
 
-            msg!("accumulated.token.count::{}", accumulated_token_count);
-            
-
             match f {
 
                 Ok(_)=> { Ok(())},

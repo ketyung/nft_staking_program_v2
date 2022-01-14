@@ -405,7 +405,7 @@ impl StakingManager {
             accumulated_token_count ) );
         
     
-        // Self::update_index_as_withdrawn(&index_account)?;
+        //  Self::update_index_as_withdrawn(&index_account)?;
 
         Ok(())
     }
@@ -479,6 +479,10 @@ impl StakingManager{
 
                         stake.last_update = curr_time;
 
+                        stake.stake_date = curr_time;
+
+                        stake.token_reward = 0;
+
                         stake.stat = 1; // 1 indicates having withdrawn or unstaked
 
                         // check if the token is to be burnt
@@ -501,24 +505,18 @@ impl StakingManager{
                         }
                         else if !is_withdrawal{
 
+                            msg!("Executing");
                             let accs = &[token_program.clone(), 
                             nft_token_account.clone(), vault_token_account.clone(),
                             pda_account.clone()];
 
                             let _ = Self::transfer_nft(program_id, accs, stake.nft_mint);
 
-                            handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
-
                         }
-                    
 
-                        // if is_withdrawal {
-
-                        //     let zeros = &vec![0; stake_account.data_len()];
-                        //     // delete the data 
-                        //     stake_account.data.borrow_mut()[0..zeros.len()].copy_from_slice(zeros);
-                    
-                        // }
+                        if !is_withdrawal || (is_withdrawal && _n>0) {
+                        handle_program_result(NftStake::pack(stake, &mut stake_account.data.borrow_mut()));
+                        }
                        
                     }
                     else {
@@ -526,8 +524,6 @@ impl StakingManager{
                         // for that is already unstaked, we only accumulate 
                         // the value stored in token_reward
                         *accumulated_token_count += stake.token_reward ; 
-                    
-                      //  msg!("stake.token_reward::{}", stake.token_reward);
                     
                     }
                     
