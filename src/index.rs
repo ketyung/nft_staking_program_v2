@@ -9,7 +9,7 @@ use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 use std::convert::{TryFrom};
 
 
-pub const NFT_SIZE_LIMIT : usize = 32;
+pub const NFT_SIZE_LIMIT : usize = 12;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NftIndex {

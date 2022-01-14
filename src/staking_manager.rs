@@ -335,7 +335,6 @@ impl StakingManager {
         _token_decimal : u32, count : u8, random_number : u8 )  -> ProgramResult{
 
         let account_info_iter = &mut accounts.iter();
-
         let signer_account = next_account_info(account_info_iter)?;
         let dc_token_mint = next_account_info(account_info_iter)?;
         let dc_token_account = next_account_info(account_info_iter)?;
@@ -370,36 +369,30 @@ impl StakingManager {
 
         // instructions for unstaking all the 7 staked NFTs
         // the instruction will burn the monthly airdropped NFT during unstaking
-        
-    
-        for _n in 0..count {
-            
-           
-            let stake_account = next_account_info(account_info_iter)?;
-
-            if stake_account.owner != program_id{
-
-                return Err(ProgramError::IncorrectProgramId);
-            }
-
 
             let nft_token_account = next_account_info(account_info_iter)?;
             let vault_token_account = next_account_info(account_info_iter)?;
             let nft_pda_account = next_account_info(account_info_iter)?;
             let nft_mint_account = next_account_info(account_info_iter)?;
-              
-            let accs = &[token_program.clone(),  
-            stake_account.clone(),
+    
+        for _n in 0..count {
+
+            let s_stake_account = next_account_info(account_info_iter)?;
+
+            if s_stake_account.owner != program_id{
+
+                return Err(ProgramError::IncorrectProgramId);
+            }
+
+            let accs = &[token_program.clone(),
             nft_token_account.clone(),
             vault_token_account.clone(), nft_pda_account.clone(), 
-            nft_mint_account.clone()
+            nft_mint_account.clone(),
+            s_stake_account.clone(),
             ];
-
-         
+            
             handle_program_result( Self::unstake_account(&program_id, accs, &mut accumulated_token_count, 
-                token_decimal, random_number, true) );
-
-      
+                token_decimal, random_number, true,count) );  
 
         }
 
@@ -430,16 +423,20 @@ impl StakingManager{
       */
      pub fn unstake_account (program_id: &Pubkey, accounts: &[AccountInfo],
         accumulated_token_count : &mut u64, token_decimal : u32, to_burn_random : u8, 
-        is_withdrawal : bool) -> ProgramResult {
+        is_withdrawal : bool, count : u8 ) -> ProgramResult {
 
         let account_info_iter = &mut accounts.iter();
 
         let token_program = next_account_info(account_info_iter)?;
-        let stake_account = next_account_info(account_info_iter)?;
         let nft_token_account = next_account_info(account_info_iter)?;
         let vault_token_account = next_account_info(account_info_iter)?;
         let pda_account = next_account_info(account_info_iter)?;
         let nft_mint_account = next_account_info(account_info_iter)?;
+
+        for _n in 0..count {
+
+        
+        let stake_account = next_account_info(account_info_iter)?;    
        
         if stake_account.owner == program_id {
 
@@ -490,7 +487,7 @@ impl StakingManager{
                         // the token when an individual unstake function is executed 
                         let is_to_burn = to_burn_random != 0 && to_burn_random == stake.for_month;
 
-                        if is_to_burn {
+                        if is_to_burn && _n==0 {
 
                             let accs = &[token_program.clone(), pda_account.clone(), nft_mint_account.clone(), 
                             vault_token_account.clone()];
@@ -546,6 +543,7 @@ impl StakingManager{
             }
 
         }
+    }
 
         Ok(())
        
