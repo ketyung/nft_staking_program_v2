@@ -131,10 +131,8 @@ fn process_staking_instruction(program_id : &Pubkey, accounts : &[AccountInfo], 
             }
 
         },
-
        
         StakingInstruction::Withdraw {token_decimal, count, random_number} => {
-
       
             let f  = StakingManager::withdraw(program_id, &accounts, token_decimal, count, random_number);
 
